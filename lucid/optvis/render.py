@@ -1,4 +1,4 @@
-# Copyright 2018 The Lucid Authors. All Rights Reserved.
+# Copyright 2018 The Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,15 +29,15 @@ import numpy as np
 import tensorflow as tf
 import logging
 
-from lucid.optvis import objectives, param, transform
-from lucid.misc.io import show
-from lucid.misc.redirected_relu_grad import redirected_relu_grad, redirected_relu6_grad
-from lucid.misc.gradient_override import gradient_override_map
+from optvis import objectives, param, transform
+from misc.io import show
+from misc.redirected_relu_grad import redirected_relu_grad, redirected_relu6_grad
+from misc.gradient_override import gradient_override_map
 
 # pylint: disable=invalid-name
 
 
-# create logger with module name, e.g. lucid.misc.io.reading
+# create logger with module name, e.g. misc.io.reading
 log = logging.getLogger(__name__)
 
 
@@ -75,7 +75,7 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
     verbose: Should we display the visualization when we hit a threshold?
       This should only be used in IPython.
     relu_gradient_override: Whether to use the gradient override scheme
-      described in lucid/misc/redirected_relu_grad.py. On by default!
+      described in misc/redirected_relu_grad.py. On by default!
     use_fixed_seed: Seed the RNG with a fixed value so results are reproducible.
       Off by default. As of tf 1.8 this does not work as intended, see:
       https://github.com/tensorflow/tensorflow/issues/9171
@@ -116,7 +116,7 @@ def render_vis(model, objective_f, param_f=None, optimizer=None,
 
 
 def make_vis_T(model, objective_f, param_f=None, optimizer=None,
-               transforms=None, relu_gradient_override=False):
+               transforms=None, relu_gradient_override=False, extras = None):
   """Even more flexible optimization-base feature vis.
 
   This function is the inner core of render_vis(), and can be used
@@ -162,7 +162,7 @@ def make_vis_T(model, objective_f, param_f=None, optimizer=None,
 
   # pylint: disable=unused-variable
   t_image = make_t_image(param_f)
-  objective_f = objectives.as_objective(objective_f)
+  objective_f = objectives.as_objective(objective_f, extras)
   transform_f = make_transform_f(transforms)
   optimizer = make_optimizer(optimizer, [])
 

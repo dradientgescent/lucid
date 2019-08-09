@@ -1,4 +1,4 @@
-# Copyright 2018 The Lucid Authors. All Rights Reserved.
+# Copyright 2018 The Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ from __future__ import absolute_import, division, print_function
 from decorator import decorator
 import numpy as np
 import tensorflow as tf
+from optvis.style import gram_style
 
 
-from lucid.optvis.objectives_util import _dot, _dot_cossim, _extract_act_pos, _make_arg_str, _T_force_NHWC, _T_handle_batch
-
+from optvis.objectives_util import _dot, _dot_cossim, _extract_act_pos, _make_arg_str, _T_force_NHWC, _T_handle_batch
+import numpy as np
 # We use T as a variable name to access all kinds of tensors
 # pylint: disable=invalid-name
-
 
 class Objective(object):
   """"A wrapper to make objective functions easy to combine.
@@ -167,16 +167,20 @@ def neuron(layer_name, channel_n, x=None, y=None, batch=None):
     layer = T(layer_name)
     layer = _extract_act_pos(layer, x, y)
     return tf.reduce_mean(layer[..., channel_n])
+
   return inner
 
 
 @wrap_objective(require_format='NHWC')
-def channel(layer, n_channel, batch=None):
+def channel(layer, n_channel, batch=None, gram = None):
   """Visualize a single channel"""
 
   @handle_batch(batch)
   def inner(T):
-    return tf.reduce_mean(T(layer)[..., n_channel])
+    var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
+    image_gram = gram_style(tf.reshape(var, [-1, 4]))
+    epsilon = 1e-6
+    return tf.reduce_mean(T(layer)[..., n_channel]) + 0.01*tf.norm(var) + 1e-0*tf.sqrt(epsilon + tf.reduce_mean((gram - image_gram) ** 2))
   return inner
 
 
@@ -458,7 +462,7 @@ def class_logit(layer, label):
   return inner
 
 
-def as_objective(obj):
+def as_objective(obj, extra):
   """Convert obj into Objective class.
 
   Strings of the form "layer:n" become the Objective channel(layer, n).
@@ -477,4 +481,5 @@ def as_objective(obj):
   elif isinstance(obj, str):
     layer, n = obj.split(":")
     layer, n = layer.strip(), int(n)
-    return channel(layer, n)
+    print(extra)
+    return channel(layer, n, gram = extra)
