@@ -177,10 +177,19 @@ def channel(layer, n_channel, batch=None, gram = None):
 
   @handle_batch(batch)
   def inner(T):
+    kernel = lambda x, y: tf.reduce_mean(tf.exp((-1./(2*1**2))*tf.abs(x-y)**2))
+
     var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
-    image_gram = gram_style(tf.reshape(var, [-1, 4]))
-    epsilon = 1e-6
-    return tf.reduce_mean(T(layer)[..., n_channel]) + 0.01*tf.norm(var) + 1e-0*tf.sqrt(epsilon + tf.reduce_mean((gram - image_gram) ** 2))
+    var_vec = tf.reshape(var, [-1, 4])
+    gram_vec = tf.reshape(gram, [-1, 4])
+
+    kernel_loss = 0
+    for i in range(4):
+      for j in range(4):
+        print ("calculating kernal loss")
+        kernel_loss  += kernel(var_vec[:, i], var_vec[:, j]) + kernel(gram_vec[:, i], gram_vec[:, j]) - 2*kernel(var_vec[:, i], gram_vec[:, j])
+
+    return tf.reduce_mean(T(layer)[..., n_channel]) + 1e-5*kernel_loss + 1e-3*tf.norm(var) # + 1e-0*tf.sqrt(epsilon + tf.reduce_mean((gram - image_gram) ** 2))
   return inner
 
 
