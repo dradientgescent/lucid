@@ -162,7 +162,7 @@ def make_vis_T(model, objective_f, param_f=None, optimizer=None,
 
   # pylint: disable=unused-variable
   t_image = make_t_image(param_f)
-  objective_f = objectives.as_objective(objective_f, extras)
+  objective_f = objectives.as_objective(objective_f)
   transform_f = make_transform_f(transforms)
   optimizer = make_optimizer(optimizer, [])
 

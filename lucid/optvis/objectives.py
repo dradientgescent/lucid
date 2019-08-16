@@ -177,7 +177,7 @@ def channel(layer, n_channel, batch=None, gram = None):
 
   @handle_batch(batch)
   def inner(T):
-    kernel = lambda x, y: tf.reduce_mean(tf.exp((-1./(2*1**2))*tf.abs(x-y)**2))
+    kernel = lambda x, y: tf.reduce_mean(tf.exp((-1./(2*2**2))*tf.abs(x-y)**2))
 
     var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
     var_vec = tf.reshape(var, [-1, 4])
@@ -189,7 +189,7 @@ def channel(layer, n_channel, batch=None, gram = None):
         print ("calculating kernal loss")
         kernel_loss  += kernel(var_vec[:, i], var_vec[:, j]) + kernel(gram_vec[:, i], gram_vec[:, j]) - 2*kernel(var_vec[:, i], gram_vec[:, j])
 
-    return tf.reduce_mean(T(layer)[..., n_channel]) + 1e-5*kernel_loss + 1e-3*tf.norm(var) # + 1e-0*tf.sqrt(epsilon + tf.reduce_mean((gram - image_gram) ** 2))
+    return tf.reduce_mean(T(layer)[..., n_channel]) + 1e-6*kernel_loss + 1e-5*tf.norm(var) # + 1e-0*tf.sqrt(epsilon + tf.reduce_mean((gram - image_gram) ** 2))
   return inner
 
 
@@ -471,7 +471,7 @@ def class_logit(layer, label):
   return inner
 
 
-def as_objective(obj, extra):
+def as_objective(obj):
   """Convert obj into Objective class.
 
   Strings of the form "layer:n" become the Objective channel(layer, n).
@@ -490,5 +490,4 @@ def as_objective(obj, extra):
   elif isinstance(obj, str):
     layer, n = obj.split(":")
     layer, n = layer.strip(), int(n)
-    print(extra)
-    return channel(layer, n, gram = extra)
+    return channel(layer, n)
