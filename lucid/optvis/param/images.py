@@ -1,4 +1,4 @@
-# Copyright 2018 The Lucid Authors. All Rights Reserved.
+# Copyright 2018 The Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 
 import tensorflow as tf
 
-from lucid.optvis.param.color import to_valid_rgb
-from lucid.optvis.param.spatial import pixel_image, fft_image
+from optvis.param.color import to_valid_rgb
+from optvis.param.spatial import pixel_image, fft_image
 
 
 def image(w, h=None, batch=None, sd=None, decorrelate=True, fft=True, alpha=False, channels=None):

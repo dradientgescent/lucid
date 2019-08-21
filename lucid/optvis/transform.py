@@ -35,12 +35,12 @@ def jitter(d, seed=None):
         t_image = tf.convert_to_tensor(t_image, preferred_dtype=tf.float32)
         t_shp = tf.shape(t_image)
         #print(t_image.get_shape())
-        crop_shape = tf.concat([t_shp[:-3], t_shp[-3:-1] - d+4, t_shp[-1:]], 0)
+        crop_shape = tf.concat([t_shp[:-3], t_shp[-3:-1] - d, t_shp[-1:]], 0)
         crop = tf.random_crop(t_image, crop_shape, seed=seed)
         shp = t_image.get_shape().as_list()
         mid_shp_changed = [
-            shp[-3] - d+4 if shp[-3] is not None else None,
-            shp[-2] - d+4 if shp[-3] is not None else None,
+            shp[-3] - d if shp[-3] is not None else None,
+            shp[-2] - d if shp[-3] is not None else None,
         ]
         crop.set_shape(shp[:-3] + mid_shp_changed + shp[-1:])
         #print(crop.get_shape())

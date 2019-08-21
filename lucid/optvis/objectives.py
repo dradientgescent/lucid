@@ -180,7 +180,7 @@ def channel(layer, n_channel, batch=None, gram = None):
     var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
     image_gram = gram_style(tf.reshape(var, [-1, 4]))
     epsilon = 1e-6
-    return tf.reduce_mean(T(layer)[..., n_channel])  #- 1e-5*tf.norm(var) #+ 1*tf.sqrt(epsilon + tf.reduce_mean((var - tf.reshape(gram, [2, 4, 240, 121])) ** 2))
+    return tf.reduce_mean(T(layer)[..., n_channel])  - 1e-4*tf.norm(var) + 3*tf.sqrt(tf.reduce_mean((var - tf.reshape(gram, [2, 4, 240, 121])) ** 2))
   return inner
 
 
