@@ -38,11 +38,11 @@ tumor_model.load_graphdef()
 #  graph_def.ParseFromString(f.read())
 
 JITTER = 8
-ROTATE = 10
+ROTATE = 4
 SCALE = 1.3
 L1 = -0.05
-TV = -0.25
-BLUR = -1.0
+TV = -5e-7
+BLUR = -1e-4
 
 DECORRELATE = True
 
@@ -54,8 +54,8 @@ fig = plt.figure()
 plt.tight_layout()
 plt.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
 
-layers_to_consider = [15]
-indices_to_consider = [3]
+layers_to_consider = [20]
+indices_to_consider = [18]
 
 for l, index in zip(layers_to_consider, indices_to_consider):
 
@@ -64,14 +64,14 @@ for l, index in zip(layers_to_consider, indices_to_consider):
   with tf.Graph().as_default() as graph, tf.Session() as sess:
 
 
-    gram_template = tf.constant(np.load('/home/parth/lucid/lucid/test_image.npy'),
+    gram_template = tf.constant(np.load('/home/parth/lucid/lucid/GramTemplate.npy'),
                                   dtype=tf.float32)
     print(gram_template.get_shape())
 
     obj = channel(index)
     # obj += L1 * objectives.L1(constant=.5)
-    # obj += TV * objectives.total_variation()
-    # obj += BLUR * objectives.blur_input_each_step()
+    obj += TV * objectives.total_variation()
+    #obj += BLUR * objectives.blur_input_each_step()
 
     transforms = [
       transform.pad(2 * JITTER),
@@ -114,7 +114,7 @@ for l, index in zip(layers_to_consider, indices_to_consider):
       ax.tick_params(bottom='off', top='off', labelbottom='off' )
                 # plt.subplot(7, 7, i*7 +(j+1))
 
-    plt.savefig('style_1_%d_%d.png' %(l, index), bbox_inches='tight')
+    plt.savefig('consider/no_reg_%d_%d.png' %(l, index), bbox_inches='tight')
     # ax = fig.add_subplot(4, 4, l+1)
     # ax.set_title(('%d, %d' %(layer, l)))
     # ax.set_xticks([])

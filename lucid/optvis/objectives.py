@@ -35,7 +35,7 @@ from decorator import decorator
 import numpy as np
 import tensorflow as tf
 from optvis.style import gram_style
-
+from tensorflow.image import total_variation as tv
 
 from optvis.objectives_util import _dot, _dot_cossim, _extract_act_pos, _make_arg_str, _T_force_NHWC, _T_handle_batch
 import numpy as np
@@ -178,14 +178,15 @@ def channel(layer, n_channel, batch=None, gram = None):
   @handle_batch(batch)
   def inner(T):
     var = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)[0]
+    print(total_variation(tf.transpose(tf.reshape(var, [1, 4, 240, 242]), perm = [0, 2, 3, 1])))
     image_gram = gram_style(tf.reshape(var, [-1, 4]))
     epsilon = 1e-6
-    return tf.reduce_mean(T(layer)[..., n_channel])  - 1e-4*tf.norm(var) + 3*tf.sqrt(tf.reduce_mean((var - tf.reshape(gram, [2, 4, 240, 121])) ** 2))
+    return tf.reduce_mean(T(layer)[..., n_channel]) - 1e-5*tf.norm(tf.transpose(tf.reshape(var, [1, 4, 240, 242]), perm = [0, 2, 3, 1])) + 1e-2*tf.sqrt(tf.reduce_mean((image_gram - gram) ** 2))
   return inner
 
 
 @wrap_objective(require_format='NHWC')
-def direction(layer, vec, cossim_pow=0, batch=None):
+def direction(layer, vec, cossim_pow=0, batch=None): 
   """Visualize a direction"""
   vec = vec[None, None, None]
   vec = vec.astype("float32")
